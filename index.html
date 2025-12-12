@@ -1,230 +1,284 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Assinatura Plus+</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Plus+ — Assinaturas</title>
+<link rel="icon" href="https://i.postimg.cc/fbm60y7Q/logo.png">
 
 <!-- Google Identity Services -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 
 <style>
-    body {
-        background:#0d0d0d;
-        font-family: Arial, sans-serif;
-        color:white;
-        margin:0;
-        padding:20px;
-        text-align:center;
-    }
-
-    .card {
-        background:#111;
-        padding:20px;
-        border-radius:14px;
-        max-width:420px;
-        margin:40px auto;
-        box-shadow:0 0 14px rgba(255,0,80,0.2);
-    }
-
-    .plan-btn {
-        width:100%;
-        padding:14px;
-        font-size:16px;
-        border-radius:10px;
-        margin-top:14px;
-        border:none;
-        cursor:pointer;
-    }
-
-    .disabled {
-        opacity:0.4;
-        pointer-events:none;
-    }
-
-    #gbutton {
-        margin:20px auto;
-        width:100%;
-        display:flex;
-        justify-content:center;
-    }
-
-    #logoutBtn {
-        background:#333;
-        color:white;
-        padding:10px 14px;
-        border-radius:8px;
-        border:none;
-        margin-top:20px;
-    }
-
+  :root{--bg:#0f0f10;--card:#111;--accent:#ff0055;--muted:#9a9a9a}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial;
+    background:var(--bg);
+    color:#fff;
+  }
+  .wrap{max-width:980px;margin:28px auto;padding:20px}
+  header{display:flex;align-items:center;gap:16px}
+  .logo{display:flex;align-items:center;gap:12px}
+  .logo img{height:56px;border-radius:8px}
+  h1{font-size:20px;margin:0}
+  .lead{color:var(--muted);margin-top:6px}
+  .main{display:grid;grid-template-columns:360px 1fr;gap:20px;margin-top:20px}
+  .card{background:var(--card);padding:18px;border-radius:12px}
+  .poster{width:100%;border-radius:8px;display:block}
+  .plans{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+  .plan{
+    padding:12px;
+    border-radius:10px;
+    background:linear-gradient(180deg,#1a1a1a,#0f0f10);
+    border:1px solid rgba(255,255,255,0.03)
+  }
+  .plan strong{font-size:16px}
+  .plan .muted{color:var(--muted)}
+  .btn{
+    padding:10px 14px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-weight:700
+  }
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-ghost{
+    background:transparent;
+    border:1px solid rgba(255,255,255,0.06);
+    color:#fff
+  }
+  .muted{color:var(--muted);font-size:13px}
+  .disabled{opacity:.35;pointer-events:none}
+  #afterPayOverlay{
+    display:none;position:fixed;inset:0;
+    background:rgba(0,0,0,0.85);
+    backdrop-filter:blur(4px);
+    z-index:99999;
+    justify-content:center;align-items:center
+  }
+  #afterPayBox{
+    width:90%;max-width:520px;background:#111;padding:18px;
+    border-radius:12px;text-align:center
+  }
+  @media(max-width:880px){
+    .main{grid-template-columns:1fr}
+  }
 </style>
-
 </head>
 <body>
 
-<div class="card">
+<div class="wrap">
 
-    <img src="https://i.postimg.cc/fbm60y7Q/logo.png" 
-         style="width:100%;border-radius:10px;margin-bottom:15px;">
+<header>
+  <div class="logo">
+    <img src="https://i.postimg.cc/X7K2J1tx/plus-poster-vertical.jpg" alt="GL Plus+">
+    <div>
+      <h1>GL Plus+</h1>
+      <div class="lead">Assinaturas mensais e anuais — faça login para assinar</div>
+    </div>
+  </div>
 
-    <h2>Assinar Plus+</h2>
-    <p>Faça login com sua conta Google usada no app.</p>
+  <!-- Google Button Render -->
+  <div style="margin-left:auto" id="gbutton"></div>
+</header>
 
-    <!-- Botão que o Google irá renderizar -->
-    <div id="gbutton"></div>
+<main class="main">
 
-    <!-- Área de status -->
-    <div id="statusArea" style="margin-top:10px;opacity:0.8;">
-        Você não está logado.
+  <!-- PÔSTER -->
+  <div class="card">
+    <img class="poster" src="https://i.postimg.cc/yN37MSRy/P-ster-das-assinaturas-Plus.jpg">
+    <div class="muted" style="margin-top:10px">
+      Faça login com sua Conta Google. Após pagar, abra o app GL Plus+ e faça login com a mesma conta Google.
+    </div>
+  </div>
+
+  <!-- PLANOS -->
+  <div>
+
+    <div class="card">
+      <h2 style="margin:0 0 8px 0">Escolha o plano</h2>
+
+      <div class="plans">
+
+        <!-- Mensal -->
+        <div class="plan">
+          <strong>Básico — R$9,90/mês</strong>
+          <div class="muted">Descontos VN · 3 canais · Conta individual</div>
+
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button id="btnMensal" class="btn btn-primary disabled">Assinar Mensal</button>
+            <button class="btn btn-ghost">Detalhes</button>
+          </div>
+        </div>
+
+        <!-- Anual -->
+        <div class="plan">
+          <strong>Premium — 12x R$10,17 (R$99,90)</strong>
+          <div class="muted">Até 15% de desconto · +6 canais · Família (2 convidados)</div>
+
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button id="btnAnual" class="btn btn-primary disabled">Assinar Anual</button>
+            <button class="btn btn-ghost">Detalhes</button>
+          </div>
+        </div>
+
+      </div>
     </div>
 
-    <!-- Botões de planos -->
-    <button id="btnMensal" class="plan-btn disabled" style="background:#ff0055;color:white;">
-        Assinar Mensal (R$ 29,90)
-    </button>
+    <div style="height:12px"></div>
 
-    <button id="btnAnual" class="plan-btn disabled" style="background:#ff3380;color:white;">
-        Assinar Anual (R$ 199,90)
-    </button>
+    <!-- STATUS -->
+    <div class="card" style="text-align:center">
+      <div id="statusArea" class="muted">Você não está logado.</div>
+      <div style="height:10px"></div>
+      <div style="display:flex;gap:8px;justify-content:center">
+        <button id="btnLogin" class="btn btn-ghost">Entrar com Google</button>
+        <button id="btnLogout" class="btn" style="display:none">Sair</button>
+      </div>
+    </div>
 
-    <!-- Botão de sair -->
-    <button id="logoutBtn" style="display:none;">Sair da Conta</button>
+  </div>
+
+</main>
 </div>
 
+<!-- OVERLAY -->
+<div id="afterPayOverlay">
+  <div id="afterPayBox">
+    <h3>Pagamento iniciado</h3>
+    <p>Quando concluir o pagamento, abra o app GL Plus+ e faça login com a mesma conta Google.</p>
+    <button id="afterPayClose" class="btn btn-ghost">Fechar</button>
+  </div>
+</div>
 
+<!-- LOGIN + LIBERAÇÃO PLANOS -->
 <script>
-// ==============================
-//  CONFIG — Mesmo CLIENT_ID do app
-// ==============================
+/* ==================================
+      CONFIGURAÇÕES REAIS
+   ================================== */
 const CLIENT_ID = "467099082704-bbqe4ble2u63mbpgv0mkdars78pigi6i.apps.googleusercontent.com";
+const LINK_MENSAL = "https://mpago.la/2SRyqam";
+const LINK_ANUAL  = "https://mpago.la/2SRyqam";
 
-// Links de pagamento
-const LINK_PAGAMENTO_MENSAL = "https://mpago.la/2SRyqam";
-const LINK_PAGAMENTO_ANUAL  = "https://mpago.la/2SRyqam";
+/* ==================================
+      ELEMENTOS
+   ================================== */
+const btnLogin = document.getElementById('btnLogin');
+const btnLogout = document.getElementById('btnLogout');
+const btnMensal = document.getElementById('btnMensal');
+const btnAnual  = document.getElementById('btnAnual');
+const statusArea = document.getElementById('statusArea');
+const overlay = document.getElementById('afterPayOverlay');
+const overlayClose = document.getElementById('afterPayClose');
 
-// ELEMENTOS DO SITE
-const btnMensal = document.getElementById("btnMensal");
-const btnAnual  = document.getElementById("btnAnual");
-const btnLogout = document.getElementById("logoutBtn");
-const statusArea = document.getElementById("statusArea");
-
-// Onde o Google vai renderizar o botão
-const gbutton = document.getElementById("gbutton");
-
-
-// ==============================
-//  FUNÇÃO PADRÃO DO APP – parse JWT
-// ==============================
-function parseJwt(token) {
-    try { return JSON.parse(atob(token.split('.')[1])); }
-    catch(e) { return null; }
+/* ==================================
+      FUNÇÕES DO APP — IGUAIS!
+   ================================== */
+function parseJwt (token) {
+  try { return JSON.parse(atob(token.split('.')[1])); }
+  catch(e) { return null; }
 }
 
-
-// ==============================
-//  APLICA ESTADO DO LOGIN (igual app)
-// ==============================
 function applyLoginState() {
-    const saved = localStorage.getItem("glplus_user");
+  const saved = localStorage.getItem('glplus_user');
 
-    if (saved) {
-        const user = JSON.parse(saved);
+  if (saved) {
+    const user = JSON.parse(saved);
+    statusArea.textContent = "Logado como " + user.email;
 
-        statusArea.textContent = "Logado como " + user.email;
+    btnLogin.style.display = "none";
+    btnLogout.style.display = "inline-block";
 
-        btnLogout.style.display = "block";
-        btnMensal.classList.remove("disabled");
-        btnMensal.disabled = false;
-        btnAnual.classList.remove("disabled");
-        btnAnual.disabled = false;
+    btnMensal.classList.remove("disabled");
+    btnMensal.disabled = false;
 
-    } else {
-        statusArea.textContent = "Você não está logado.";
+    btnAnual.classList.remove("disabled");
+    btnAnual.disabled = false;
 
-        btnLogout.style.display = "none";
-        btnMensal.classList.add("disabled");
-        btnMensal.disabled = true;
-        btnAnual.classList.add("disabled");
-        btnAnual.disabled = true;
-    }
+  } else {
+    statusArea.textContent = "Você não está logado.";
+
+    btnLogin.style.display = "inline-block";
+    btnLogout.style.display = "none";
+
+    btnMensal.classList.add("disabled");
+    btnMensal.disabled = true;
+
+    btnAnual.classList.add("disabled");
+    btnAnual.disabled = true;
+  }
 }
 
+/* ==================================
+      CALLBACK DO GOOGLE
+   ================================== */
+function handleCredentialResponse(res) {
+  const payload = parseJwt(res.credential);
+  if (!payload) return;
 
-// ==============================
-//  CALLBACK DO GOOGLE LOGIN
-//  (EXATAMENTE O MESMO FORMATO DO APP)
-// ==============================
-function handleCredentialResponse(response) {
-    const profile = parseJwt(response.credential);
+  const user = {
+    name: payload.name,
+    email: payload.email,
+    picture: payload.picture
+  };
 
-    if (!profile) {
-        alert("Erro ao autenticar Google.");
-        return;
-    }
+  // SALVA EXATAMENTE IGUAL AO APP
+  localStorage.setItem("glplus_user", JSON.stringify(user));
 
-    const user = {
-        name: profile.name,
-        email: profile.email,
-        picture: profile.picture
-    };
-
-    // >>> MESMO STORAGE DO APP <<<
-    localStorage.setItem("glplus_user", JSON.stringify(user));
-
-    applyLoginState();
+  applyLoginState();
 }
 
-
-// ==============================
-//  INICIALIZA O GOOGLE BUTTON
-// ==============================
+/* ==================================
+      INICIALIZAÇÃO GOOGLE
+   ================================== */
 function initGoogle() {
-    google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: handleCredentialResponse
-    });
+  google.accounts.id.initialize({
+    client_id: CLIENT_ID,
+    callback: handleCredentialResponse
+  });
 
-    google.accounts.id.renderButton(gbutton, {
-        theme: "outline",
-        size: "large",
-        text: "signin_with",
-        width: 250
-    });
+  google.accounts.id.renderButton(
+    document.getElementById('gbutton'),
+    { theme:"outline", size:"large" }
+  );
 }
 
+/* ==================================
+      AÇÕES
+   ================================== */
+btnLogin.onclick = () => google.accounts.id.prompt();
+btnLogout.onclick = () => {
+  localStorage.removeItem("glplus_user");
+  applyLoginState();
+};
 
-// ==============================
-//  EVENTOS DE CLICK
-// ==============================
 btnMensal.onclick = () => {
-    window.open(LINK_PAGAMENTO_MENSAL, "_blank");
+  window.open(LINK_MENSAL, "_blank");
+  overlay.style.display = "flex";
 };
 
 btnAnual.onclick = () => {
-    window.open(LINK_PAGAMENTO_ANUAL, "_blank");
+  window.open(LINK_ANUAL, "_blank");
+  overlay.style.display = "flex";
 };
 
-btnLogout.onclick = () => {
-    localStorage.removeItem("glplus_user");
-    applyLoginState();
-};
+overlayClose.onclick = () => overlay.style.display = "none";
 
-
-// ==============================
-//  START
-// ==============================
+/* ==================================
+      START
+   ================================== */
 window.onload = () => {
-    applyLoginState();
+  applyLoginState();
 
-    let tries = 0;
-    const timer = setInterval(() => {
-        if (window.google && google.accounts && google.accounts.id) {
-            clearInterval(timer);
-            initGoogle();
-        }
-        if (++tries > 20) clearInterval(timer);
-    }, 200);
+  let tries = 0;
+  const timer = setInterval(() => {
+    if (window.google?.accounts?.id) {
+      clearInterval(timer);
+      initGoogle();
+    }
+    if (++tries > 20) clearInterval(timer);
+  }, 150);
 };
 </script>
 
