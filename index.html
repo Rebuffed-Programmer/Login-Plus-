@@ -271,5 +271,170 @@
     applyLoginState();
   });
   </script>
+  <!-- ====== GOOGLE SIGN-IN FIX (cole no final do body) ====== -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+/*
+  Substitua CLIENT_ID abaixo pelo seu client id (já fornecido).
+  Este snippet:
+  - inicializa google.accounts.id
+  - renderiza botão em #gbutton
+  - armazena glplus_user em localStorage (nome/email/picture)
+  - chama applyLoginState() (mesma lógica que seu app usa)
+  - tem logs para debug
+*/
+
+const CLIENT_ID = "467099082704-bbqe4ble2u63mbpgv0mkdars78pigi6i.apps.googleusercontent.com"; // seu client_id
+
+// elementos que você já tem no HTML
+const LOGIN_BTN_WRAPPER_ID = "gbutton"; // onde o botão será renderizado
+
+// utilidades (mantém compatibilidade com seu app)
+function parseJwt(token) {
+  try { return JSON.parse(atob(token.split('.')[1])); } catch(e) { console.error("parseJwt error", e); return null; }
+}
+
+function applyLoginState() {
+  // mesma função que você usa — adaptada pra garantir que o estado atualize
+  const u = JSON.parse(localStorage.getItem('glplus_user') || '{}');
+  const statusArea = document.getElementById('statusArea');
+  const btnLogin = document.getElementById('btnLogin');
+  const btnLogout = document.getElementById('btnLogout');
+  const btnMensal = document.getElementById('btnMensal');
+  const btnAnual = document.getElementById('btnAnual');
+
+  if (u && u.email) {
+    if (statusArea) statusArea.textContent = 'Logado como ' + (u.name || u.email);
+    if (btnLogin) btnLogin.style.display = 'none';
+    if (btnLogout) btnLogout.style.display = 'inline-block';
+    if (btnMensal) { btnMensal.classList.remove('disabled'); btnMensal.disabled = false; btnMensal.style.opacity = '1'; }
+    if (btnAnual) { btnAnual.classList.remove('disabled'); btnAnual.disabled = false; btnAnual.style.opacity = '1'; }
+    console.log("applyLoginState: user present", u.email);
+  } else {
+    if (statusArea) statusArea.textContent = 'Você não está logado.';
+    if (btnLogin) btnLogin.style.display = 'inline-block';
+    if (btnLogout) btnLogout.style.display = 'none';
+    if (btnMensal) { btnMensal.classList.add('disabled'); btnMensal.disabled = true; btnMensal.style.opacity = '0.4'; }
+    if (btnAnual) { btnAnual.classList.add('disabled'); btnAnual.disabled = true; btnAnual.style.opacity = '0.4'; }
+    console.log("applyLoginState: no user");
+  }
+}
+
+// callback que o Google chama quando o login for bem sucedido
+function handleCredentialResponse(response) {
+  console.log("handleCredentialResponse:", response);
+  const payload = parseJwt(response.credential);
+  if (!payload) {
+    console.error("Token parse failed");
+    return;
+  }
+
+  const user = {
+    name: payload.name || "",
+    email: payload.email || "",
+    picture: payload.picture || "",
+    sub: payload.sub || ""
+  };
+
+  // salva do mesmo jeito que o app espera
+  localStorage.setItem('glplus_user', JSON.stringify(user));
+  console.log("Google sign-in saved to localStorage as glplus_user:", user.email);
+
+  // atualiza UI do site e libera planos
+  applyLoginState();
+
+  // opcional: se quiser chamar backend para marcar "pago/pending", aqui é o lugar
+  // fetch(BACKEND_CHECK + '?email=' + encodeURIComponent(user.email)).then(...)
+}
+
+// inicializa o Google Identity assim que a lib estiver disponível
+function initGoogleIdentity() {
+  if (!window.google || !google.accounts || !google.accounts.id) {
+    console.error("Google Identity library not available.");
+    return;
+  }
+
+  // initialize (callback = credential handler)
+  google.accounts.id.initialize({
+    client_id: CLIENT_ID,
+    callback: handleCredentialResponse,
+    ux_mode: 'popup' // popup evita problemas com redirect URIs
+  });
+
+  // renderiza um botão visível dentro da DIV #gbutton
+  try {
+    const wrapper = document.getElementById(LOGIN_BTN_WRAPPER_ID);
+    if (wrapper) {
+      // limpa wrapper antes
+      wrapper.innerHTML = "";
+      google.accounts.id.renderButton(wrapper, {
+        theme: "outline",
+        size: "large",
+        type: "standard",
+        text: "signin_with"
+      });
+      console.log("Google renderButton done");
+    } else {
+      console.warn("#gbutton wrapper not found, button not rendered");
+    }
+  } catch (err) {
+    console.error("Error rendering Google button:", err);
+  }
+
+  // habilita prompt (One Tap) — opcional: mostra dropdown de contas
+  // Se preferir NÃO usar prompt, comente a linha abaixo.
+  try {
+    google.accounts.id.prompt((notification) => {
+      // notifications: 'dismissed', 'skipped', 'displayed', 'credential_received'
+      console.log("google.accounts.id.prompt:", notification);
+    });
+  } catch(e) {
+    console.warn("google.accounts.id.prompt error:", e);
+  }
+}
+
+// fallback: checa e aplica estado mesmo sem Google
+window.addEventListener('DOMContentLoaded', () => {
+  // ligando botões de login/logout no site (se existirem)
+  const btnLogin = document.getElementById('btnLogin');
+  const btnLogout = document.getElementById('btnLogout');
+
+  if (btnLogin) {
+    btnLogin.addEventListener('click', () => {
+      // Se a lib google já estiver pronta, aciona prompt/rendered button. Senão, informa o usuário.
+      if (window.google && google.accounts && google.accounts.id) {
+        google.accounts.id.prompt();
+      } else {
+        alert("Google Identity ainda não carregou. Recarregue a página.");
+      }
+    });
+  }
+
+  if (btnLogout) {
+    btnLogout.addEventListener('click', () => {
+      localStorage.removeItem('glplus_user');
+      applyLoginState();
+      alert('Desconectado');
+    });
+  }
+
+  // apply initial UI state
+  applyLoginState();
+
+  // tenta inicializar o Google a cada 200ms por até 5s (evita race conditions do async script)
+  let tries = 0;
+  const tryInit = setInterval(() => {
+    tries++;
+    if (window.google && google.accounts && google.accounts.id) {
+      clearInterval(tryInit);
+      initGoogleIdentity();
+    } else if (tries > 25) { // ~25 * 200ms = 5s
+      clearInterval(tryInit);
+      console.warn("Google Identity lib not available after waiting. Check network/console for errors.");
+    }
+  }, 200);
+});
+</script>
 </body>
 </html>
