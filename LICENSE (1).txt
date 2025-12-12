@@ -1,0 +1,29 @@
+Copyright (c) 2025 Gabriel Lucas. All Rights Reserved.
+
+Este projeto, incluindo todo o seu código-fonte, interface, design,
+layout, scripts internos, funcionalidades, estrutura lógica, arquivos,
+imagens, textos, áudio, vídeo e demais elementos associados, é
+protegido pela Lei de Direitos Autorais (Lei 9.610/98), Convenção de
+Berna, DMCA e demais legislações nacionais e internacionais
+relacionadas à propriedade intelectual.
+
+É estritamente proibido, sem autorização expressa e por escrito do
+titular:
+
+- Copiar, modificar, redistribuir, vender ou sublicenciar qualquer
+  parte deste software.
+- Utilizar este software ou partes dele para fins comerciais.
+- Praticar engenharia reversa, descompilar, desmontar ou tentar
+  extrair seu funcionamento interno.
+- Reutilizar trechos de código, interface, design ou lógica em outros
+  projetos.
+- Publicar, distribuir ou disponibilizar novos builds derivados deste
+  código.
+
+O uso não autorizado deste software poderá resultar em medidas
+administrativas, cíveis e criminais, conforme previsto na legislação
+brasileira e internacional de direitos autorais.
+
+Este software é disponibilizado exclusivamente para fins pessoais e
+não comerciais, e não concede ao usuário qualquer licença, direito ou
+autorização além do permitido pelo titular.
