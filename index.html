@@ -282,38 +282,46 @@ window.onload = () => {
 };
 </script>
 
-<button id="btnTeste" class="btn btn-ghost">
-  Ativar Plus+ (TESTE)
+<button id="btnTestPlus" class="btn btn-ghost">
+  🧪 Ativar Plus+ (Teste)
 </button>
 
 <script>
-document.getElementById("btnTeste").onclick = async () => {
+document.getElementById("btnTestPlus").onclick = () => {
   const saved = localStorage.getItem("glplus_user");
+
   if (!saved) {
-    alert("Faça login com Google primeiro.");
+    alert("Faça login com Google antes de ativar o teste.");
     return;
   }
 
   const user = JSON.parse(saved);
+  const now = Date.now();
 
-  try {
-    const res = await fetch("https://gl.vercel.app/api/testActivate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: user.email,
-        plan: "MENSAL"
-      })
-    });
+  // ASSINATURA GOOGLE (PRINCIPAL)
+  localStorage.setItem("plus_google_subscription", JSON.stringify({
+    email: user.email,
+    plan: "TESTE",
+    start: now,
+    expiry: now + (30 * 24 * 60 * 60 * 1000), // 30 dias
+    type: "google"
+  }));
 
-    if (!res.ok) throw new Error("request failed");
+  // TOKEN FAMÍLIA / VISITANTE (OPCIONAL)
+  localStorage.setItem("plus_token_access", JSON.stringify({
+    token: "GL-TEST-" + Math.random().toString(36).substr(2, 6).toUpperCase(),
+    expiry: now + (7 * 24 * 60 * 60 * 1000), // 7 dias
+    type: "token"
+  }));
 
-    alert("✅ Plus+ ativado em modo TESTE por 30 dias!");
-  } catch (e) {
-    alert("❌ Erro ao ativar teste");
-    console.error(e);
-  }
+  alert("✅ Plus+ TESTE ativado com sucesso!\nAgora abra o app GL Plus+.");
+
+  console.log("Plus+ TESTE ATIVO:", {
+    google: JSON.parse(localStorage.getItem("plus_google_subscription")),
+    token: JSON.parse(localStorage.getItem("plus_token_access"))
+  });
 };
 </script>
+  
 </body>
 </html>
