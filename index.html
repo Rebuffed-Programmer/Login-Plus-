@@ -297,7 +297,7 @@ document.getElementById("btnTeste").onclick = async () => {
   const user = JSON.parse(saved);
 
   try {
-    const res = await fetch("https://gl-alpha.vercel.app/api/testActivate", {
+    const res = await fetch("https://gl.vercel.app/api/testActivate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
