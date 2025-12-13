@@ -282,27 +282,29 @@ window.onload = () => {
 };
 </script>
 
-<button id="btnTestePlus" style="margin-top:10px">
-  🧪 Ativar Plus+ (Teste)
-</button>
+<button id="btnTestPlus">ATIVAR PLUS+ (TESTE)</button>
 
 <script>
-document.getElementById("btnTestePlus").onclick = () => {
-  const user = localStorage.getItem("glplus_user");
+async function activateTest(days = 30) {
+  const user = JSON.parse(localStorage.getItem("glplus_user"));
   if (!user) {
-    alert("Faça login com Google primeiro");
+    alert("Faça login com Google");
     return;
   }
 
-  const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 dias
+  await fetch("/api/testActivate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      email: user.email,
+      days
+    })
+  });
 
-  localStorage.setItem("plus_google_subscription", JSON.stringify({
-    plan: "MENSAL",
-    expiry: expiry
-  }));
+  alert("Plus+ ativado para testes");
+}
 
-  alert("✅ Plus+ ativado por 30 dias (TESTE)");
-};
+document.getElementById("btnTestPlus").onclick = () => activateTest(30);
 </script>
   
 </body>
