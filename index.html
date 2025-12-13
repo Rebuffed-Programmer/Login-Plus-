@@ -282,74 +282,41 @@ window.onload = () => {
 };
 </script>
 
-<!-- ========================= -->
-<!--  BOTÕES DE TESTE (DEV)    -->
-<!-- ========================= -->
-<div class="card" style="margin-top:12px;text-align:center;">
-  <div class="muted">⚠️ Área de testes (remover depois)</div>
-  <div style="margin-top:10px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-    <button class="btn btn-ghost" onclick="simulateSubscription('mensal')">
-      🧪 Testar Mensal (30 dias)
-    </button>
-    <button class="btn btn-ghost" onclick="simulateSubscription('anual')">
-      🧪 Testar Anual (365 dias)
-    </button>
-  </div>
-</div>
+<button id="btnTesteBackend" class="btn btn-ghost">
+  Ativar Plus+ (TESTE BACKEND)
+</button>
+  <script>
+document.getElementById("btnTesteBackend").onclick = async () => {
+  const saved = localStorage.getItem("glplus_user");
+  if (!saved) {
+    alert("Faça login com Google primeiro");
+    return;
+  }
 
-<script>
-/* ======================================================
-   SIMULAÇÃO DE ASSINATURA GL PLUS+ (SITE DE ASSINATURA)
-   ====================================================== */
+  const user = JSON.parse(saved);
 
-const DAY = 24 * 60 * 60 * 1000;
+  // simula plano mensal
+  const payload = {
+    email: user.email,
+    plan: "MENSAL"
+  };
 
-/* CRIAR ASSINATURA */
-function simulateSubscription(plan) {
-    const savedUser = localStorage.getItem("glplus_user");
+  try {
+    const res = await fetch("/api/testActivate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-    if (!savedUser) {
-        alert("⚠️ Faça login com Google antes de testar a assinatura.");
-        return;
+    if (res.ok) {
+      alert("✅ Assinatura de TESTE ativada no backend!");
+    } else {
+      alert("❌ Erro ao ativar teste");
     }
-
-    const user = JSON.parse(savedUser);
-
-    const now = Date.now();
-    const expiresAt =
-        plan === "mensal"
-        ? now + (30 * DAY)
-        : now + (365 * DAY);
-
-    const subscription = {
-        email: user.email,
-        plan: plan,
-        startedAt: now,
-        expiresAt: expiresAt
-    };
-
-    // Salva assinatura (MESMO PADRÃO QUE O APP VAI LER)
-    localStorage.setItem(
-        "glplus_subscription",
-        JSON.stringify(subscription)
-    );
-
-    alert(
-        `✅ Assinatura ${plan.toUpperCase()} simulada!\n\n` +
-        `Conta: ${user.email}\n` +
-        `Válida até: ${new Date(expiresAt).toLocaleString()}\n\n` +
-        `Agora abra o app Plus+ e faça login com essa mesma conta Google.`
-    );
-
-    console.log("Assinatura criada:", subscription);
-}
-
-/* VERIFICAÇÃO AUXILIAR (debug) */
-function hasActiveSubscription() {
-    const sub = JSON.parse(localStorage.getItem("glplus_subscription"));
-    if (!sub) return false;
-    return Date.now() < sub.expiresAt;
-}
+  } catch (e) {
+    alert("Erro de rede");
+  }
+};
 </script>
 
 </body>
