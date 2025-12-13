@@ -282,42 +282,38 @@ window.onload = () => {
 };
 </script>
 
-<button id="btnTesteBackend" class="btn btn-ghost">
-  Ativar Plus+ (TESTE BACKEND)
+<button id="btnTeste" class="btn btn-ghost">
+  Ativar Plus+ (TESTE)
 </button>
-  <script>
-document.getElementById("btnTesteBackend").onclick = async () => {
+
+<script>
+document.getElementById("btnTeste").onclick = async () => {
   const saved = localStorage.getItem("glplus_user");
   if (!saved) {
-    alert("Faça login com Google primeiro");
+    alert("Faça login com Google primeiro.");
     return;
   }
 
   const user = JSON.parse(saved);
 
-  // simula plano mensal
-  const payload = {
-    email: user.email,
-    plan: "MENSAL"
-  };
-
   try {
-    const res = await fetch("/api/testActivate", {
+    const res = await fetch("https://gl-alpha.vercel.app/api/testActivate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        email: user.email,
+        plan: "MENSAL"
+      })
     });
 
-    if (res.ok) {
-      alert("✅ Assinatura de TESTE ativada no backend!");
-    } else {
-      alert("❌ Erro ao ativar teste");
-    }
+    if (!res.ok) throw new Error("request failed");
+
+    alert("✅ Plus+ ativado em modo TESTE por 30 dias!");
   } catch (e) {
-    alert("Erro de rede");
+    alert("❌ Erro ao ativar teste");
+    console.error(e);
   }
 };
 </script>
-
 </body>
 </html>
