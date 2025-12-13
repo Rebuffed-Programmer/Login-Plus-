@@ -282,44 +282,26 @@ window.onload = () => {
 };
 </script>
 
-<button id="btnTestPlus" class="btn btn-ghost">
+<button id="btnTestePlus" style="margin-top:10px">
   🧪 Ativar Plus+ (Teste)
 </button>
 
 <script>
-document.getElementById("btnTestPlus").onclick = () => {
-  const saved = localStorage.getItem("glplus_user");
-
-  if (!saved) {
-    alert("Faça login com Google antes de ativar o teste.");
+document.getElementById("btnTestePlus").onclick = () => {
+  const user = localStorage.getItem("glplus_user");
+  if (!user) {
+    alert("Faça login com Google primeiro");
     return;
   }
 
-  const user = JSON.parse(saved);
-  const now = Date.now();
+  const expiry = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 dias
 
-  // ASSINATURA GOOGLE (PRINCIPAL)
   localStorage.setItem("plus_google_subscription", JSON.stringify({
-    email: user.email,
-    plan: "TESTE",
-    start: now,
-    expiry: now + (30 * 24 * 60 * 60 * 1000), // 30 dias
-    type: "google"
+    plan: "MENSAL",
+    expiry: expiry
   }));
 
-  // TOKEN FAMÍLIA / VISITANTE (OPCIONAL)
-  localStorage.setItem("plus_token_access", JSON.stringify({
-    token: "GL-TEST-" + Math.random().toString(36).substr(2, 6).toUpperCase(),
-    expiry: now + (7 * 24 * 60 * 60 * 1000), // 7 dias
-    type: "token"
-  }));
-
-  alert("✅ Plus+ TESTE ativado com sucesso!\nAgora abra o app GL Plus+.");
-
-  console.log("Plus+ TESTE ATIVO:", {
-    google: JSON.parse(localStorage.getItem("plus_google_subscription")),
-    token: JSON.parse(localStorage.getItem("plus_token_access"))
-  });
+  alert("✅ Plus+ ativado por 30 dias (TESTE)");
 };
 </script>
   
